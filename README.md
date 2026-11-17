@@ -1,6 +1,6 @@
 # EUROLEAGUE HUB
 
-Projekto aplankas ir repozitorija: `KREPSINIS` / `tomlebedev-cloud/krepsinis`.
+Projekto aplankas: `EUROLEAGUE-HUB`, repozitorija: `tomlebedev-cloud/krepsinis`.
 
 Visos krepšinio lygos vienoje vietoje: rezultatai, statistika, prognozės ir statymų įrankiai.
 
