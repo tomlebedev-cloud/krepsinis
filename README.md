@@ -14,6 +14,10 @@ Svetainė: https://tomlebedev-cloud.github.io/krepsinis/
 `index.html` – pradinis puslapis su informaciniais blokais kiekvienai lygai.
 Kiekvieno aplanko `README.md` aprašo tos lygos puslapius, modelį ir duomenų atnaujinimą.
 
+## Statymų žurnalas
+
+`statymai/statymai.csv` – asmeninis statymų žurnalas (buvęs BETS projektas). Jis git-ignoruojamas ir į GitHub nekeliamas, nes repozitorija vieša.
+
 ## Duomenų atnaujinimas
 
 Kiekviena lyga turi savo GitHub Actions darbą (`.github/workflows/<lyga>.yml`) su savo tvarkaraščiu:
