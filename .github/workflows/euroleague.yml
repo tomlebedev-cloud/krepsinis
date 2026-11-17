@@ -1,4 +1,4 @@
-name: Update EuroCup data
+name: Update EuroLeague data
 
 on:
   schedule:
@@ -19,8 +19,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-data
+  group: update-euroleague
   cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: euroleague
 
 jobs:
   update:
@@ -36,9 +40,9 @@ jobs:
       # Finished box scores never change; keep them between runs so only new games are downloaded.
       - uses: actions/cache@v4
         with:
-          path: .cache
-          key: eurocup-cache-${{ github.run_id }}
-          restore-keys: eurocup-cache-
+          path: euroleague/.cache
+          key: euroleague-cache-${{ github.run_id }}
+          restore-keys: euroleague-cache-
 
       - name: Download data
         run: |
@@ -58,5 +62,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add js/data.js
-          git commit -m "Update EuroCup data ($(date -u +%Y-%m-%d))"
-          git push
+          git commit -m "Update EuroLeague data ($(date -u +%Y-%m-%d))"
+          # Four leagues update the same repository; if another one pushed first, rebase and try again.
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q && git push && exit 0
+            sleep $((i * 10))
+          done
+          exit 1

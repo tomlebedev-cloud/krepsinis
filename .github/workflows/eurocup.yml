@@ -1,11 +1,11 @@
-name: Update ACB data
+name: Update EuroCup data
 
 on:
   schedule:
-    # Quick checks around game time: Liga Endesa plays from noon to late evening in Spain, so every half
-    # hour from 11:00 to 22:59 UTC. They only do a full update when a game has finished since the last one
-    # (update_data.py --if-new).
-    - cron: "13,43 11-22 * * *"
+    # Quick checks around game time: every half hour in the evening and hourly through the night (UTC).
+    # They only do a full update when a game has finished since the last one (update_data.py --if-new).
+    - cron: "13,43 16-23 * * *"
+    - cron: "13 0-4 * * *"
     # Full update every morning (rosters, schedule changes), whether or not games were played.
     - cron: "23 5 * * *"
   workflow_dispatch: # allows running it manually from the Actions tab
@@ -19,8 +19,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-data
+  group: update-eurocup
   cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: eurocup
 
 jobs:
   update:
@@ -36,9 +40,9 @@ jobs:
       # Finished box scores never change; keep them between runs so only new games are downloaded.
       - uses: actions/cache@v4
         with:
-          path: .cache
-          key: acb-cache-${{ github.run_id }}
-          restore-keys: acb-cache-
+          path: eurocup/.cache
+          key: eurocup-cache-${{ github.run_id }}
+          restore-keys: eurocup-cache-
 
       - name: Download data
         run: |
@@ -58,5 +62,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add js/data.js
-          git commit -m "Update ACB data ($(date -u +%Y-%m-%d))"
-          git push
+          git commit -m "Update EuroCup data ($(date -u +%Y-%m-%d))"
+          # Four leagues update the same repository; if another one pushed first, rebase and try again.
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q && git push && exit 0
+            sleep $((i * 10))
+          done
+          exit 1

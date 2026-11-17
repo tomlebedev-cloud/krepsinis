@@ -3,8 +3,7 @@ name: Update LKL data
 on:
   schedule:
     # Quick checks around game time: LKL games end between about 18:00 and 23:30 in Lithuania, so every
-    # half hour from 15:00 to 21:59 UTC. They only do a full update when a game has finished since the last
-    # one (update_data.py --if-new).
+    # half hour from 15:00 to 21:59 UTC. They only do a full update when a game has finished since the last one.
     - cron: "13,43 15-21 * * *"
     # Full update every morning (rosters, schedule changes), whether or not games were played.
     - cron: "23 5 * * *"
@@ -19,8 +18,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-data
+  group: update-lkl
   cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: lkl
 
 jobs:
   update:
@@ -36,7 +39,7 @@ jobs:
       # Finished box scores never change; keep them between runs so only new games are downloaded.
       - uses: actions/cache@v4
         with:
-          path: .cache
+          path: lkl/.cache
           key: lkl-cache-${{ github.run_id }}
           restore-keys: lkl-cache-
 
@@ -59,4 +62,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add js/data.js
           git commit -m "Update LKL data ($(date -u +%Y-%m-%d))"
-          git push
+          # Four leagues update the same repository; if another one pushed first, rebase and try again.
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q && git push && exit 0
+            sleep $((i * 10))
+          done
+          exit 1

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Krepšinis</title>
+  <style>
+    :root {
+      --bg: #f5f6f8; --card: #ffffff; --text: #1b1d22; --muted: #6b7180;
+      --border: #e3e5ea; --accent: #f26b1d; --head: #14161b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #121418; --card: #1b1e24; --text: #e8eaee; --muted: #9aa1ad; --border: #2a2e36; --head: #0b0c0f; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.45; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    header { background: var(--head); color: #fff; }
+    header .wrap { padding-top: 14px; padding-bottom: 14px; font-weight: 800; font-size: 1.15rem; }
+    main { padding-top: 28px; padding-bottom: 28px; }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; }
+    .lead { color: var(--muted); margin: 0 0 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .block { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: border-color .15s, transform .15s; }
+    .block:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .block .top { display: flex; align-items: center; gap: 10px; }
+    .block .flag { font-size: 1.6rem; }
+    .block h2 { font-size: 1.15rem; margin: 0; }
+    .block p { margin: 0; color: var(--muted); font-size: .93rem; }
+    .meta { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); font-size: .85rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+    .meta b { color: var(--text); font-weight: 600; }
+    .open { color: var(--accent); font-weight: 600; }
+    footer { color: var(--muted); font-size: .85rem; padding-bottom: 32px; }
+  </style>
+</head>
+<body>
+  <header><div class="wrap">🏀 Krepšinis</div></header>
+  <main class="wrap">
+    <h1>Krepšinio lygos</h1>
+    <p class="lead">Rezultatai, statistika, prognozės ir statymų įrankiai – visos lygos vienoje vietoje.</p>
+    <div class="grid" id="blocks"></div>
+  </main>
+  <footer class="wrap">Duomenys atnaujinami automatiškai po rungtynių ir kiekvieną rytą.</footer>
+
+  <script>
+    const LEAGUES = [
+      { dir: "euroleague", flag: "🇪🇺", name: "Eurolyga", text: "Geriausi Europos klubai: reguliarus sezonas, statistika, prognozės ir vertingi statymai." },
+      { dir: "eurocup", flag: "🇪🇺", name: "Europos taurė", text: "EuroCup grupės ir atkrintamosios, tie patys įrankiai kaip Eurolygoje." },
+      { dir: "lkl", flag: "🇱🇹", name: "LKL", text: "Lietuvos krepšinio lyga: rezultatai, lyderiai, prognozės ir bilietas kitam turui." },
+      { dir: "acb", flag: "🇪🇸", name: "ACB", text: "Ispanijos Liga Endesa: komandos, žaidėjai, tvarkaraštis ir statymų planas." },
+    ];
+    const grid = document.getElementById("blocks");
+    for (const l of LEAGUES) {
+      const a = document.createElement("a");
+      a.className = "block";
+      a.href = l.dir + "/";
+      a.innerHTML = `<div class="top"><span class="flag">${l.flag}</span><h2>${l.name}</h2></div>
+        <p>${l.text}</p>
+        <div class="meta"><span>Atnaujinta: <b data-upd>…</b></span><span class="open">Atidaryti →</span></div>`;
+      grid.appendChild(a);
+      // Read only the header of the league's data file to show when it was last updated.
+      fetch(l.dir + "/js/data.js", { headers: { Range: "bytes=0-400" } })
+        .then(r => r.text())
+        .then(t => {
+          const m = t.match(/const UPDATED = "([^"]+)"/);
+          a.querySelector("[data-upd]").textContent = m ? m[1].replace(" UTC", "") : "—";
+        })
+        .catch(() => { a.querySelector("[data-upd]").textContent = "—"; });
+    }
+  </script>
+</body>
+</html>
