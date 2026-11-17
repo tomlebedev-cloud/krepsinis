@@ -1,4 +1,4 @@
-# Euroleague Hub
+# EUROLEAGUE HUB
 
 Projekto aplankas ir repozitorija: `KREPSINIS` / `tomlebedev-cloud/krepsinis`.
 
